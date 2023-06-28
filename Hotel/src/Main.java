@@ -8,14 +8,14 @@ public class Main {
         boolean running = true;
 
         while (running) {
-            System.out.println("Please select what you want to do:");
             System.out.println("1-Make a reservation");
             System.out.println("2-List free rooms");
             System.out.println("3-Checkout room");
             System.out.println("4-Stats");
             System.out.println("5-Find a room");
             System.out.println("6-Update a room");
-
+            System.out.println("Please select what you want to do:");
+            
             int choice = scan.nextInt();
 
             switch (choice) {
@@ -45,7 +45,28 @@ public class Main {
         System.out.println("Goodbye");
     }
     private static void makeReservation(Scanner scan){
+        System.out.println("Enter room number: ");
+        int roomNum = scan.nextInt();
+        scan.nextLine();
 
+        System.out.println("Start date(dd/mm/yyyy): ");
+        String startDate=scan.nextLine();
+
+        System.out.println("End date(dd/mm/yyyy): ");
+        String endDate=scan.nextLine();
+
+        System.out.println("Enter notes: ");
+        String notes=scan.nextLine();
+
+        Map<String, Object> reservation =new HashMap<>();
+        reservation.put("startDate", startDate);
+        reservation.put("endDate", endDate);
+        reservation.put("notes", notes);
+
+        rooms.put(roomNum, reservation);
+
+        System.out.println("Reservation was created!");
+        System.out.println("");
     }
     private static void listFreeRooms(){
 
