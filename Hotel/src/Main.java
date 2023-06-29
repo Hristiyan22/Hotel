@@ -72,6 +72,24 @@ public class Main {
 
     }
     private static void checkoutRoom(Scanner scan){
+        System.out.println("Enter a room number to checkout: ");
+        int roomNum = scan.nextInt();
+
+        boolean roomFound = false;
+
+        for (Integer existingRoomNum : rooms.keySet()) {
+            if (existingRoomNum == roomNum) {
+                roomFound = true;
+                break;
+            }
+        }
+
+        if (roomFound) {
+            rooms.remove(roomNum);
+            System.out.println("Room" + roomNum + " has been checked out.");
+        } else {
+            System.out.println("Room " + roomNum + " is not reserved.");
+        }
 
     }
     private static void displayStats(Scanner scan){
