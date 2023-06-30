@@ -96,9 +96,30 @@ public class Main {
 
     }
     private static void findRoom(Scanner scan){
+System.out.println("Enter number of beds:");
+        int beds = scan.nextInt();
+        scan.nextLine();
 
+        System.out.println("Enter start date(dd/mm/yyyy):");
+        String startDate = scan.nextLine();
+
+        System.out.println("Enter end date(dd/mm/yyyy):");
+        String endDate = scan.nextLine();
+
+        System.out.println("Available rooms: "); /
+        for (Map.Entry<Integer, Map<String, Object>> roomEntry : rooms.entrySet()) {
+            int roomNum = roomEntry.getKey();
+            Map<String, Object> reservation = roomEntry.getValue();
+
+            if (reservation == null && hasEnoughBeds(roomNum, beds)) {
+                System.out.println(roomNum);
+            }
+        }
     }
     private static void updateRoom(Scanner scan){
 
+    }
+    private static boolean hasEnoughBeds(int roomNum, int beds) {
+        return true;
     }
 }
