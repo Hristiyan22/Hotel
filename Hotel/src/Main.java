@@ -106,14 +106,24 @@ System.out.println("Enter number of beds:");
         System.out.println("Enter end date(dd/mm/yyyy):");
         String endDate = scan.nextLine();
 
-        System.out.println("Available rooms: "); /
-        for (Map.Entry<Integer, Map<String, Object>> roomEntry : rooms.entrySet()) {
-            int roomNum = roomEntry.getKey();
-            Map<String, Object> reservation = roomEntry.getValue();
+        String fileName = "RoomsWith" + beds + "Beds.txt";
 
-            if (reservation == null && hasEnoughBeds(roomNum, beds)) {
-                System.out.println(roomNum);
+        System.out.println("Available rooms: ");
+        try (Scanner fileScan = new Scanner(new File(fileName))) {
+            while (fileScan.hasNextLine()) {
+                String line = fileScan.nextLine();
+                String[] roomData = line.split(",");
+                int roomNum = Integer.parseInt(roomData[0]);
+                String roomStartDate = roomData[1];
+                String roomEndDate = roomData[2];
+
+                if (roomStartDate.compareTo(endDate) > 0 || roomEndDate.compareTo(startDate) < 0) {
+                    
+                    System.out.println(roomNum);
+                }
             }
+        } catch (FileNotFoundException e) {
+            System.out.println("File not found: " + fileName);
         }
     }
     private static void updateRoom(Scanner scan){
