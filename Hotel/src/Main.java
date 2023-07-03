@@ -127,9 +127,20 @@ System.out.println("Enter number of beds:");
         }
     }
     private static void updateRoom(Scanner scan){
+    System.out.println("Enter room number to update: ");
+        int roomNum = scan.nextInt();
+        scan.nextLine();
 
-    }
-    private static boolean hasEnoughBeds(int roomNum, int beds) {
-        return true;
+        if (rooms.containsKey(roomNum)) {
+            System.out.println("Enter new notes: ");
+            String newNotes = scan.nextLine();
+
+            Map<String, Object> reservation = rooms.get(roomNum);
+            reservation.put("notes", newNotes);
+
+            System.out.println("Room " + roomNum + "has been updated.");
+        } else {
+            System.out.println("Room " + roomNum + "is not reserved.");
+        }
     }
 }
