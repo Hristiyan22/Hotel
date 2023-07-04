@@ -93,7 +93,36 @@ public class Main {
 
     }
     private static void displayStats(Scanner scan){
+System.out.println("Enter start date(dd/mm/yyyy):");
+        String startDate = scan.nextLine();
+        scan.nextLine();
 
+        System.out.println("Enter end date(dd/mm/yyyy):");
+        String endDate = scan.nextLine();
+
+        for (int i = 1; i <= 4; i++) {
+            String fileName = "RoomsWith" + i + "Beds.txt";
+            try (Scanner fileScan = new Scanner(new File(fileName))) {
+                while (fileScan.hasNextLine()) {
+                    String line = fileScan.nextLine();
+                    int roomNum = Integer.parseInt(line);
+                    Map<String, Object> reservation = rooms.get(roomNum);
+
+                    if (reservation != null) {
+                        String resStartDate = (String) reservation.get("startDate");
+                        String resEndDate = (String) reservation.get("endDate");
+
+                        if (resStartDate.compareTo(endDate) < 0 || resEndDate.compareTo(startDate) > 0) {
+                            int resDur = getResDur(resStartDate, resEndDate);
+                            System.out.println("Room " + roomNum + ":" + resDur + " days");
+                        }
+                    }
+                }
+            } catch (FileNotFoundException ex) {
+                System.out.println(ex.getMessage() + ":" + fileName);
+            }
+
+        }
     }
     private static void findRoom(Scanner scan){
 System.out.println("Enter number of beds:");
