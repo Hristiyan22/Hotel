@@ -1,4 +1,6 @@
 import java.util.*;
+import java.io.*;
+import java.SimpleDateFormat;
 
 public class Main {
     private static Map<Integer, Map<String, Object>> rooms = new HashMap<>();
@@ -42,7 +44,7 @@ public class Main {
                     break;
             }
         }
-        System.out.println("Goodbye");
+        System.out.println("Goodbye!");
     }
     private static void makeReservation(Scanner scan){
         System.out.println("Enter room number: ");
@@ -58,7 +60,7 @@ public class Main {
         System.out.println("Enter notes: ");
         String notes=scan.nextLine();
 
-        Map<String, Object> reservation =new HashMap<>();
+        Map<String, Object> reservation = new HashMap<>();
         reservation.put("startDate", startDate);
         reservation.put("endDate", endDate);
         reservation.put("notes", notes);
@@ -69,7 +71,23 @@ public class Main {
         System.out.println("");
     }
     private static void listFreeRooms(){
+ System.out.println("List of free rooms: ");
 
+        for (int i = 1; i <= 4; i++) {
+            String fileName = "RoomsWith" + i + "Beds.txt";
+
+            try (Scanner fileScan = new Scanner(new File(fileName))) {
+                while (fileScan.hasNextLine()) {
+                    String roomNum = fileScan.nextLine();
+
+                    if (!rooms.containsKey(Integer.parseInt(roomNum))) {
+                        System.out.println(roomNum);
+                    }
+                }
+            } catch (FileNotFoundException ex) {
+                System.out.println("File not found: " + fileName);
+            }
+        }
     }
     private static void checkoutRoom(Scanner scan){
         System.out.println("Enter a room number to checkout: ");
@@ -172,4 +190,5 @@ System.out.println("Enter number of beds:");
             System.out.println("Room " + roomNum + "is not reserved.");
         }
     }
+    
 }
