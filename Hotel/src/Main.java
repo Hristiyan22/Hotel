@@ -59,7 +59,19 @@ public class Main {
 
         System.out.println("Enter notes: ");
         String notes=scan.nextLine();
+        
+        Map<String, Object> existingRes = rooms.get(roomNum);
+        if (existingRes != null) {
+            String resStartDate = (String) existingRes.get("startDate");
+            String resEndDate = (String) existingRes.get("endDate");
 
+            if (resStartDate.compareTo(endDate) <= 0 || resEndDate.compareTo(endDate) >= 0) {
+                System.out.println("This room is already reserved. Try another room!");
+                System.out.println();
+                return;
+            }
+        }
+        
         Map<String, Object> reservation = new HashMap<>();
         reservation.put("startDate", startDate);
         reservation.put("endDate", endDate);
@@ -190,5 +202,18 @@ System.out.println("Enter number of beds:");
             System.out.println("Room " + roomNum + "is not reserved.");
         }
     }
-    
+    private static int getResDur(String startDate, String endDate) {
+        try {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("dd/mm/yyyy");
+            Date start = dateFormat.parse(startDate);
+            Date end = dateFormat.parse(endDate);
+
+            long diffInDays = (end.getTime() - start.getTime()) / (24 * 60 * 60 * 1000);
+
+            return (int) diffInDays;
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+            return -1;
+        }
+    }
 }
