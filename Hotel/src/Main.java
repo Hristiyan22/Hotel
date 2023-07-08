@@ -1,15 +1,17 @@
+import java.text.*;
 import java.util.*;
 import java.io.*;
-import java.text.*;
 
 public class Main {
-    private static Map<Integer, Map<String, Object>> rooms = new HashMap<>();
+    public static Map<Integer, Map<String, Object>> rooms = new HashMap<>();
 
     public static void main(String[] args) {
         Scanner scan = new Scanner(System.in);
         boolean running = true;
 
         while (running) {
+            System.out.println("Welcome to our hotel!");
+            System.out.println("Please select what you want to do:");
             System.out.println("1-Make a reservation");
             System.out.println("2-List free rooms");
             System.out.println("3-Checkout room");
@@ -17,9 +19,10 @@ public class Main {
             System.out.println("5-Find a room");
             System.out.println("6-Update a room");
             System.out.println("0-Finish reservation");
-            System.out.println("Please select what you want to do:");
-            
+            System.out.println("Enter your choice here: ");
+
             int choice = scan.nextInt();
+            scan.nextLine();
 
             switch (choice) {
                 case 1:
@@ -50,7 +53,8 @@ public class Main {
         }
         System.out.println("Goodbye!");
     }
-    private static void makeReservation(Scanner scan){
+
+    private static void makeReservation(Scanner scan) {
         System.out.println("Enter room number: ");
         int roomNum = scan.nextInt();
         scan.nextLine();
@@ -76,20 +80,26 @@ public class Main {
             return;
         }
 
-        System.out.println("Enter notes: ");
-        String notes = scan.nextLine();
+        if (startDate.compareTo(endDate) >= 0) {
+            System.out.println("End date should be after the start date. Try again!");
+            System.out.println();
+            return;
+        }
 
         Map<String, Object> existingRes = rooms.get(roomNum);
         if (existingRes != null) {
             String resStartDate = (String) existingRes.get("startDate");
             String resEndDate = (String) existingRes.get("endDate");
 
-            if (resStartDate.compareTo(endDate) <= 0 || resEndDate.compareTo(endDate) >= 0) {
+            if (resStartDate.compareTo(endDate) <= 0 || resEndDate.compareTo(startDate) >= 0) {
                 System.out.println("This room is already reserved. Try another room!");
                 System.out.println();
                 return;
             }
         }
+
+        System.out.println("Enter notes: ");
+        String notes = scan.nextLine();
 
         Map<String, Object> reservation = new HashMap<>();
         reservation.put("startDate", startDate);
@@ -101,7 +111,8 @@ public class Main {
         System.out.println("Reservation was created!");
         System.out.println();
     }
-    private static void listFreeRooms(){
+
+    private static void listFreeRooms() {
         System.out.println("List of free rooms: ");
 
         Map<Integer, Boolean> freeRooms = new HashMap<>();
@@ -131,9 +142,15 @@ public class Main {
         }
         System.out.println();
     }
-    private static void checkoutRoom(Scanner scan){
+
+    private static void checkoutRoom(Scanner scan) {
         System.out.println("Enter a room number to checkout: ");
         int roomNum = scan.nextInt();
+        if (!isValidRoomNumber(roomNum)) {
+            System.out.println("Invalid room number. Try again!");
+            System.out.println();
+            return;
+        }
 
         boolean roomFound = false;
 
@@ -150,11 +167,10 @@ public class Main {
         } else {
             System.out.println("Room " + roomNum + " is not reserved.");
         }
-
     }
-    private static void displayStats(Scanner scan){
-System.out.println("Enter start date(dd/mm/yyyy):");
-        ystem.out.println("Start date(dd/mm/yyyy): ");
+
+    private static void displayStats(Scanner scan) {
+        System.out.println("Start date(dd/mm/yyyy): ");
         String startDate = scan.nextLine();
         if (!isValidDate(startDate)) {
             System.out.println("Invalid date. Try again!");
@@ -166,6 +182,12 @@ System.out.println("Enter start date(dd/mm/yyyy):");
         String endDate = scan.nextLine();
         if (!isValidDate(endDate)) {
             System.out.println("Invalid date. Try again!");
+            System.out.println();
+            return;
+        }
+
+        if (startDate.compareTo(endDate) >= 0) {
+            System.out.println("End date should be after the start date. Try again!");
             System.out.println();
             return;
         }
@@ -188,18 +210,21 @@ System.out.println("Enter start date(dd/mm/yyyy):");
                         }
                     }
                 }
+
             } catch (FileNotFoundException ex) {
                 System.out.println(ex.getMessage() + ":" + fileName);
             }
-
         }
+        System.out.println();
     }
-    private static void findRoom(Scanner scan){
-System.out.println("Enter number of beds:");
+
+    private static void findRoom(Scanner scan) {
+        System.out.println("Enter number of beds:");
         int beds = scan.nextInt();
         scan.nextLine();
 
         if (beds > 0 && beds < 5) {
+            String fileName = "RoomsWith" + beds + "Beds.txt";
             System.out.println("Enter start date(dd/mm/yyyy):");
             String startDate = scan.nextLine();
             if (!isValidDate(startDate)) {
@@ -216,18 +241,28 @@ System.out.println("Enter number of beds:");
                 return;
             }
 
-            String fileName = "RoomsWith" + beds + "Beds.txt";
+            if (startDate.compareTo(endDate) >= 0) {
+                System.out.println("End date should be after the start date. Try again!");
+                System.out.println();
+                return;
+            }
 
+            System.out.println("Available rooms:");
             try (Scanner fileScan = new Scanner(new File(fileName))) {
                 while (fileScan.hasNextLine()) {
                     String line = fileScan.nextLine();
-                    String[] roomData = line.split(",");
-                    int roomNum = Integer.parseInt(roomData[0]);
-                    String roomStartDate = roomData[1];
-                    String roomEndData = roomData[2];
+                    int roomNum = Integer.parseInt(line);
+                    Map<String, Object> reservation = rooms.get(roomNum);
 
-                    if (roomStartDate.compareTo(endDate) > 0 || roomEndData.compareTo(startDate) < 0) {
+                    if (reservation == null) {
                         System.out.println(roomNum);
+                    } else {
+                        String resStartDate = (String) reservation.get("startDate");
+                        String resEndDate = (String) reservation.get("endDate");
+
+                        if (resStartDate.compareTo(endDate) >= 0 || resEndDate.compareTo(startDate) <= 0) {
+                            System.out.println(roomNum);
+                        }
                     }
                 }
                 System.out.println();
@@ -237,9 +272,11 @@ System.out.println("Enter number of beds:");
         } else {
             System.out.println("The rooms are only with 1, 2, 3 or 4 beds. Try again!");
         }
+
     }
-    private static void updateRoom(Scanner scan){
-    System.out.println("Enter room number to update: ");
+
+    private static void updateRoom(Scanner scan) {
+        System.out.println("Enter room number to update: ");
         int roomNum = scan.nextInt();
         scan.nextLine();
         if (!isValidRoomNumber(roomNum)) {
@@ -255,14 +292,15 @@ System.out.println("Enter number of beds:");
             Map<String, Object> reservation = rooms.get(roomNum);
             reservation.put("notes", newNotes);
 
-            System.out.println("Room " + roomNum + "has been updated.");
+            System.out.println("Room " + roomNum + " has been updated.");
             System.out.println();
         } else {
-            System.out.println("Room " + roomNum + "is not reserved.");
+            System.out.println("Room " + roomNum + " is not reserved.");
             System.out.println();
         }
     }
-    public static boolean isValidRoomNumber(int roomNum) {
+
+    private static boolean isValidRoomNumber(int roomNum) {
         return ((roomNum > 100 && roomNum < 116) || (roomNum > 200 && roomNum < 216) ||
                 (roomNum > 300 && roomNum < 316) || (roomNum > 400 && roomNum < 516) || (roomNum > 500 && roomNum < 516));
     }
@@ -280,6 +318,7 @@ System.out.println("Enter number of beds:");
         }
 
     }
+
     private static int getResDur(String startDate, String endDate) {
         try {
             SimpleDateFormat dateFormat = new SimpleDateFormat("dd/mm/yyyy");
