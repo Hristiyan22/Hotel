@@ -1,6 +1,7 @@
 import java.text.*;
 import java.util.*;
 import java.io.*;
+import java.util.concurrent.TimeUnit;
 
 public class Main {
     public static Map<Integer, Map<String, Object>> rooms = new HashMap<>();
@@ -51,6 +52,7 @@ public class Main {
                     break;
             }
         }
+        System.out.println("Thank you for staying in our hotel!");
         System.out.println("Goodbye!");
     }
 
@@ -65,51 +67,60 @@ public class Main {
         }
 
         System.out.println("Start date(dd/mm/yyyy): ");
-        String startDate = scan.nextLine();
-        if (!isValidDate(startDate)) {
+        String startDateStr = scan.nextLine();
+        if (!isValidDate(startDateStr)) {
             System.out.println("Invalid date. Try again!");
             System.out.println();
             return;
         }
 
         System.out.println("End date(dd/mm/yyyy): ");
-        String endDate = scan.nextLine();
-        if (!isValidDate(endDate)) {
+        String endDateStr = scan.nextLine();
+        if (!isValidDate(endDateStr)) {
             System.out.println("Invalid date. Try again!");
             System.out.println();
             return;
         }
 
-        if (startDate.compareTo(endDate) >= 0) {
-            System.out.println("End date should be after the start date. Try again!");
-            System.out.println();
-            return;
-        }
+        try {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+            Date startDate = dateFormat.parse(startDateStr);
+            Date endDate = dateFormat.parse(endDateStr);
 
-        Map<String, Object> existingRes = rooms.get(roomNum);
-        if (existingRes != null) {
-            String resStartDate = (String) existingRes.get("startDate");
-            String resEndDate = (String) existingRes.get("endDate");
-
-            if (resStartDate.compareTo(endDate) <= 0 || resEndDate.compareTo(startDate) >= 0) {
-                System.out.println("This room is already reserved. Try another room!");
+            if (startDate.compareTo(endDate) >= 0) {
+                System.out.println("End date should be after the start date. Try again!");
                 System.out.println();
                 return;
             }
+
+            Map<String, Object> existingRes = rooms.get(roomNum);
+            if (existingRes != null) {
+                Date resStartDate = dateFormat.parse((String) existingRes.get("startDate"));
+                Date resEndDate = dateFormat.parse((String) existingRes.get("endDate"));
+
+                if (resStartDate.compareTo(endDate) <= 0 || resEndDate.compareTo(startDate) >= 0) {
+                    System.out.println("This room is already reserved. Try another room!");
+                    System.out.println();
+                    return;
+                }
+            }
+
+            System.out.println("Enter notes: ");
+            String notes = scan.nextLine();
+
+            Map<String, Object> reservation = new HashMap<>();
+            reservation.put("startDate", startDateStr);
+            reservation.put("endDate", endDateStr);
+            reservation.put("notes", notes);
+
+            rooms.put(roomNum, reservation);
+
+            System.out.println("Reservation was created!");
+            System.out.println();
+        } catch (ParseException ex) {
+            System.out.println("Invalid date format. Try again!");
+            System.out.println();
         }
-
-        System.out.println("Enter notes: ");
-        String notes = scan.nextLine();
-
-        Map<String, Object> reservation = new HashMap<>();
-        reservation.put("startDate", startDate);
-        reservation.put("endDate", endDate);
-        reservation.put("notes", notes);
-
-        rooms.put(roomNum, reservation);
-
-        System.out.println("Reservation was created!");
-        System.out.println();
     }
 
     private static void listFreeRooms() {
@@ -128,7 +139,6 @@ public class Main {
                         freeRooms.put(Integer.parseInt(roomNum), true);
                     }
                 }
-                System.out.println();
             } catch (FileNotFoundException ex) {
                 System.out.println("File not found: " + fileName);
             }
@@ -152,70 +162,76 @@ public class Main {
             return;
         }
 
-        boolean roomFound = false;
-
-        for (Integer existingRoomNum : rooms.keySet()) {
-            if (existingRoomNum == roomNum) {
-                roomFound = true;
-                break;
-            }
-        }
+        boolean roomFound = rooms.containsKey(roomNum);
 
         if (roomFound) {
             rooms.remove(roomNum);
-            System.out.println("Room" + roomNum + " has been checked out.");
+            System.out.println("Room " + roomNum + " has been checked out.");
         } else {
             System.out.println("Room " + roomNum + " is not reserved.");
         }
+        System.out.println();
     }
 
     private static void displayStats(Scanner scan) {
         System.out.println("Start date(dd/mm/yyyy): ");
-        String startDate = scan.nextLine();
-        if (!isValidDate(startDate)) {
+        String startDateStr = scan.nextLine();
+        if (!isValidDate(startDateStr)) {
             System.out.println("Invalid date. Try again!");
             System.out.println();
             return;
         }
 
         System.out.println("End date(dd/mm/yyyy): ");
-        String endDate = scan.nextLine();
-        if (!isValidDate(endDate)) {
+        String endDateStr = scan.nextLine();
+        if (!isValidDate(endDateStr)) {
             System.out.println("Invalid date. Try again!");
             System.out.println();
             return;
         }
 
-        if (startDate.compareTo(endDate) >= 0) {
-            System.out.println("End date should be after the start date. Try again!");
-            System.out.println();
-            return;
-        }
+        try {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+            Date startDate = dateFormat.parse(startDateStr);
+            Date endDate = dateFormat.parse(endDateStr);
 
-        for (int i = 1; i <= 4; i++) {
-            String fileName = "RoomsWith" + i + "Beds.txt";
-            try (Scanner fileScan = new Scanner(new File(fileName))) {
-                while (fileScan.hasNextLine()) {
-                    String line = fileScan.nextLine();
-                    int roomNum = Integer.parseInt(line);
-                    Map<String, Object> reservation = rooms.get(roomNum);
+            if (startDate.compareTo(endDate) >= 0) {
+                System.out.println("End date should be after the start date. Try again!");
+                System.out.println();
+                return;
+            }
 
-                    if (reservation != null) {
-                        String resStartDate = (String) reservation.get("startDate");
-                        String resEndDate = (String) reservation.get("endDate");
+            for (int i = 1; i <= 4; i++) {
+                String fileName = "RoomsWith" + i + "Beds.txt";
+                try (Scanner fileScan = new Scanner(new File(fileName))) {
+                    while (fileScan.hasNextLine()) {
+                        String line = fileScan.nextLine();
+                        int roomNum = Integer.parseInt(line);
+                        Map<String, Object> reservation = rooms.get(roomNum);
 
-                        if (resStartDate.compareTo(endDate) < 0 || resEndDate.compareTo(startDate) > 0) {
-                            int resDur = getResDur(resStartDate, resEndDate);
-                            System.out.println("Room " + roomNum + ":" + resDur + " days");
+                        if (reservation != null) {
+                            String resStartDateStr = (String) reservation.get("startDate");
+                            String resEndDateStr = (String) reservation.get("endDate");
+
+                            Date resStartDate = dateFormat.parse(resStartDateStr);
+                            Date resEndDate = dateFormat.parse(resEndDateStr);
+
+                            if (resStartDate.compareTo(endDate) <= 0 && resEndDate.compareTo(startDate) >= 0) {
+                                int resDur = getResDur(resStartDateStr, resEndDateStr);
+                                System.out.println("Room " + roomNum + ": " + resDur + " days");
+                            }
                         }
                     }
-                }
 
-            } catch (FileNotFoundException ex) {
-                System.out.println(ex.getMessage() + ":" + fileName);
+                } catch (FileNotFoundException ex) {
+                    System.out.println(ex.getMessage() + ":" + fileName);
+                }
             }
+            System.out.println();
+        } catch (ParseException ex) {
+            System.out.println("Invalid date format. Try again!");
+            System.out.println();
         }
-        System.out.println();
     }
 
     private static void findRoom(Scanner scan) {
@@ -226,53 +242,64 @@ public class Main {
         if (beds > 0 && beds < 5) {
             String fileName = "RoomsWith" + beds + "Beds.txt";
             System.out.println("Enter start date(dd/mm/yyyy):");
-            String startDate = scan.nextLine();
-            if (!isValidDate(startDate)) {
+            String startDateStr = scan.nextLine();
+            if (!isValidDate(startDateStr)) {
                 System.out.println("Invalid date. Try again!");
                 System.out.println();
                 return;
             }
 
             System.out.println("Enter end date(dd/mm/yyyy):");
-            String endDate = scan.nextLine();
-            if (!isValidDate(endDate)) {
+            String endDateStr = scan.nextLine();
+            if (!isValidDate(endDateStr)) {
                 System.out.println("Invalid date. Try again!");
                 System.out.println();
                 return;
             }
+            try {
+                SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+                Date startDate = dateFormat.parse(startDateStr);
+                Date endDate = dateFormat.parse(endDateStr);
 
-            if (startDate.compareTo(endDate) >= 0) {
-                System.out.println("End date should be after the start date. Try again!");
-                System.out.println();
-                return;
-            }
+                if (startDate.compareTo(endDate) >= 0) {
+                    System.out.println("End date should be after the start date. Try again!");
+                    System.out.println();
+                    return;
+                }
 
-            System.out.println("Available rooms:");
-            try (Scanner fileScan = new Scanner(new File(fileName))) {
-                while (fileScan.hasNextLine()) {
-                    String line = fileScan.nextLine();
-                    int roomNum = Integer.parseInt(line);
-                    Map<String, Object> reservation = rooms.get(roomNum);
+                System.out.println("Available rooms:");
+                try (Scanner fileScan = new Scanner(new File(fileName))) {
+                    while (fileScan.hasNextLine()) {
+                        String line = fileScan.nextLine();
+                        int roomNum = Integer.parseInt(line);
+                        Map<String, Object> reservation = rooms.get(roomNum);
 
-                    if (reservation == null) {
-                        System.out.println(roomNum);
-                    } else {
-                        String resStartDate = (String) reservation.get("startDate");
-                        String resEndDate = (String) reservation.get("endDate");
-
-                        if (resStartDate.compareTo(endDate) >= 0 || resEndDate.compareTo(startDate) <= 0) {
+                        if (reservation == null) {
                             System.out.println(roomNum);
+                        } else {
+                            String resStartDateStr = (String) reservation.get("startDate");
+                            String resEndDateStr = (String) reservation.get("endDate");
+
+                            Date resStartDate = dateFormat.parse(resStartDateStr);
+                            Date resEndDate = dateFormat.parse(resEndDateStr);
+
+                            if (resStartDate.compareTo(endDate) > 0 || resEndDate.compareTo(startDate) < 0) {
+                                System.out.println(roomNum);
+                            }
                         }
                     }
+                    System.out.println();
+                } catch (FileNotFoundException e) {
+                    System.out.println("File not found: " + fileName);
                 }
+            } catch (ParseException ex) {
+                System.out.println("Invalid date format. Try again!");
                 System.out.println();
-            } catch (FileNotFoundException e) {
-                System.out.println("File not found: " + fileName);
             }
         } else {
             System.out.println("The rooms are only with 1, 2, 3 or 4 beds. Try again!");
+            System.out.println();
         }
-
     }
 
     private static void updateRoom(Scanner scan) {
@@ -321,11 +348,11 @@ public class Main {
 
     private static int getResDur(String startDate, String endDate) {
         try {
-            SimpleDateFormat dateFormat = new SimpleDateFormat("dd/mm/yyyy");
+            SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
             Date start = dateFormat.parse(startDate);
             Date end = dateFormat.parse(endDate);
 
-            long diffInDays = (end.getTime() - start.getTime()) / (24 * 60 * 60 * 1000);
+            long diffInDays = TimeUnit.MILLISECONDS.toDays(end.getTime() - start.getTime());
 
             return (int) diffInDays;
         } catch (Exception ex) {
