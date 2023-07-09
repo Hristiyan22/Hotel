@@ -98,7 +98,7 @@ public class Main {
                 Date resStartDate = dateFormat.parse((String) existingRes.get("startDate"));
                 Date resEndDate = dateFormat.parse((String) existingRes.get("endDate"));
 
-                if (resStartDate.compareTo(endDate) <= 0 || resEndDate.compareTo(startDate) >= 0) {
+                if (resStartDate.compareTo(endDate) <= 0 && resEndDate.compareTo(startDate) >= 0) {
                     System.out.println("This room is already reserved. Try another room!");
                     System.out.println();
                     return;
@@ -283,7 +283,7 @@ public class Main {
                             Date resStartDate = dateFormat.parse(resStartDateStr);
                             Date resEndDate = dateFormat.parse(resEndDateStr);
 
-                            if (resStartDate.compareTo(endDate) > 0 || resEndDate.compareTo(startDate) < 0) {
+                            if (resStartDate.compareTo(endDate) > 0 && resEndDate.compareTo(startDate) < 0) {
                                 System.out.println(roomNum);
                             }
                         }
